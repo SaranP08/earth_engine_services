@@ -10,11 +10,16 @@ import json
 import json
 import os
 
-service_account_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+raw_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
 
+if not raw_json:
+    raise ValueError("GOOGLE_SERVICE_ACCOUNT_JSON not set in environment.")
 
-service_account_email = 'earthengineviewer@erathengine-learning.iam.gserviceaccount.com'
-credentials = ee.ServiceAccountCredentials(service_account_info["client_email"], key_data=service_account_info)
+service_account_info = json.loads(raw_json)
+
+credentials = ee.ServiceAccountCredentials(
+    service_account_info["client_email"], 
+    key_data=service_account_info)
 # Initialize Earth Engine with service account
 ee.Initialize(credentials)
 
