@@ -1,3 +1,4 @@
+#render backend: ndvi_timeseries.py
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
@@ -14,6 +15,8 @@ class NDVITimeSeriesRequest(BaseModel):
 
 @router.post("/api/ndvi-timeseries")
 async def compute_ndvi_timeseries(req: NDVITimeSeriesRequest):
+    print("📥 [Render] Received request:", req.dict())  # Log input
+
     lat = req.latitude
     lon = req.longitude
     ref_date = datetime.strptime(req.reference_date, "%Y-%m-%d")
@@ -25,6 +28,7 @@ async def compute_ndvi_timeseries(req: NDVITimeSeriesRequest):
     while current_date <= ref_date:
         try:
             bands = get_satellite_features(lat, lon, current_date.strftime("%Y-%m-%d"))
+            print(f"📡 [Render] {current_date.strftime('%Y-%m-%d')} - Fetched bands: B08={bands.get('B8')}, B04={bands.get('B4')}")
             b08 = bands.get("B08")
             b04 = bands.get("B04")
             if b08 is not None and b04 is not None and (b08 + b04) != 0:
@@ -37,4 +41,5 @@ async def compute_ndvi_timeseries(req: NDVITimeSeriesRequest):
             print(f"Error on {current_date.strftime('%Y-%m-%d')}: {e}")
         current_date += timedelta(days=7)
 
+    print("📤 [Render] Final NDVI timeseries:", results)
     return results
