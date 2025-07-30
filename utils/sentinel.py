@@ -1,30 +1,24 @@
 import ee
 import datetime
 import json
-
-# ----------------------------
-# AUTHENTICATE USING SERVICE ACCOUNT
-# ----------------------------
-
-# Path to your JSON key file
-import json
 import os
 
-# raw_json = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
-
+# Load service account key JSON from env variable as string
 key_data_str = os.getenv("GEE_SERVICE_ACCOUNT_JSON")
-email = json.loads(key_data_str)["client_email"]
 
-# if not raw_json:
-    # raise ValueError("GOOGLE_SERVICE_ACCOUNT_JSON not set in environment.")
+if not key_data_str:
+    raise ValueError("Missing GEE_SERVICE_ACCOUNT_JSON environment variable")
 
-# service_account_info = json.loads(raw_json)
+# Extract the client_email from the JSON string
+key_dict = json.loads(key_data_str)
+email = key_dict["client_email"]
 
+# Authenticate with Earth Engine
 credentials = ee.ServiceAccountCredentials(
-    email=email, 
-    key_data=key_data_str
-    )
-# Initialize Earth Engine with service account
+    email=email,
+    key_data=key_data_str  # This must be a JSON string
+)
+
 ee.Initialize(credentials)
 
 # ----------------------------
